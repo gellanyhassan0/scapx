@@ -559,10 +559,29 @@ Description: Log files stored in /var/log/ contain logged information from many 
 or on log hosts others as well.\n"
 fi
 
+if  grep "^root:" /etc/passwd | cut -f4 -d: 2>&1| grep -q '0' ; then 
+printf "\n$CIS 5.4.3 Ensure default group for the root account is GID 0   $SEC\n"
+else printf "\n$CIS 5.4.3 Ensure default group for the root account is GID 0 $NO_SEC
+Description:The usermod command can be used to specify which group the root user belongs to. This
+affects permissions of files that are created by the root user.\n"
+fi
 
 
+if  stat /etc/passwd 2>&1|grep -io 'Access: (0644/-rw-r--r--)'|wc -l| grep -vq '0' ; then 
+printf "\n$CIS 6.1.2 Ensure permissions on /etc/passwd are configured   $SEC\n"
+else printf "\n$CIS 6.1.2 Ensure permissions on /etc/passwd are configured $NO_SEC
+Description:The /etc/passwd file contains user account information that is used by many system
+utilities and therefore must be readable for these utilities to operate.\n"
+fi
 
-
+if stat /etc/gshadow- 2>&1|grep -io 'Access: (0640/-rw-r-----)'|wc -l| grep -vq '0' ; then 
+printf "\n$CIS 6.1.3 Ensure permissions on /etc/gshadow- are configured   $SEC\n"
+else printf "\n$CIS 6.1.3 Ensure permissions on /etc/gshadow- are configured $NO_SEC
+Description:The /etc/gshadow- file is used to store backup information about groups that is critical to
+the security of those accounts, such as the hashed password and other security
+information.
+\n"
+fi
 
 
 
