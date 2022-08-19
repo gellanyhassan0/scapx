@@ -150,7 +150,7 @@ else printf "\n$CIS 1.1.17 Ensure noexec option set on /dev/shm partition     $N
 Description: The noexec mount option specifies that the filesystem cannot contain executable binaries.\n"
 fi
 
-if mount|grep -i "nodev"| wc -l| grep -vq '0' && mount|grep -i "nosuid"| wc -l| grep -vq '0' && mount|grep -i "noexec"| wc -l| grep -vq '0'; then 
+if mount|grep -i "nodev"| wc -l| grep -vq '0' || mount|grep -i "nosuid"| wc -l| grep -vq '0' || mount|grep -i "noexec"| wc -l| grep -vq '0'; then 
 printf "\n$CIS 1.1.(18|19|20) Ensure nodev option set on removable media partitions       $SEC\n"
 else printf "\n$CIS 1.1.(18|19|20) Ensure nodev option set on removable media partitions     $NO_SEC
 Description: The nodev mount option specifies that the filesystem cannot contain special devices.
@@ -158,7 +158,7 @@ The nosuid mount option specifies that the filesystem cannot contain setuid file
 The noexec mount option specifies that the filesystem cannot contain executable binaries.\n"
 fi
 
-if  systemctl is-enabled autofs|grep -io 'disabled'| wc -l| grep -vq '0' || dpkg -s autofs|grep -io 'package `autofs` is not installed'| wc -l| grep -vq '0'; then 
+if  systemctl is-enabled autofs|grep -io 'disabled'| wc -l| grep -vq '0' || dpkg -s autofs 2>&1|grep -io 'package `autofs` is not installed'| wc -l| grep -vq '0'; then 
 printf "\n$CIS 1.1.22 Disable Automounting       $SEC\n"
 else printf "\n$CIS 1.1.22 Disable Automounting     $NO_SEC
 Description: autofs allows automatic mounting of devices, typically including CD/DVDs and USB drives.\n"
@@ -173,7 +173,7 @@ has led to USB-based malware being a simple and common means for network infiltr
 and a first step to establishing a persistent threat within a networked environment.\n"
 fi
 
-if dpkg -s sudo|grep -io 'Status: install ok installed'| wc -l| grep -vq '0' || dpkg -s sudo-ldap|grep -io 'Status: install ok installed'| wc -l| grep -vq '0'; then 
+if dpkg -s sudo 2>&1|grep -io 'Status: install ok installed'| wc -l| grep -vq '0' || dpkg -s sudo-ldap 2>&1|grep -io 'Status: install ok installed'| wc -l| grep -vq '0'; then 
 printf "\n$CIS 1.3.1 Ensure sudo is installed       $SEC\n"
 else printf "\n$CIS 1.3.1 Ensure sudo is installed     $NO_SEC
 Description: sudo allows a permitted user to execute a command as the superuser or another user, as
@@ -225,7 +225,7 @@ fi
 
 if  journalctl | grep 'protection: active'|grep -io 'kernel: NX (Execute Disable) protection: active'| wc -l| grep -vq '0' ||[[ -n $(grep noexec[0-9]*=off /proc/cmdline) || -z $(grep -E -i ' (pae|nx)
 ' /proc/cpuinfo) || -n $(grep '\sNX\s.*\sprotection:\s' /var/log/dmesg | grep
--v active) ]] && echo "NX Protection is not active"|wc -l| grep -q '0'; then 
+-v active) ]] || echo "NX Protection is not active"|wc -l| grep -q '0'; then 
 printf "\n$CIS 1.6.1 Ensure XD/NX support is enabled        $SEC\n"
 else printf "\n$CIS 1.6.1 Ensure XD/NX support is enabled      $NO_SEC
 Description: Recent processors in the x86 family support the ability to prevent code execution on a per
@@ -244,7 +244,7 @@ Description: Address space layout randomization (ASLR) is an exploit mitigation 
 randomly arranges the address space of key data areas of a process.\n"
 fi
 
-if  dpkg -s prelink|grep -oi 'not installed'|wc -l| grep -vq '0' ; then 
+if  dpkg -s prelink 2>&1|grep -oi 'not installed'|wc -l| grep -vq '0' ; then 
 printf "\n$CIS 1.6.3 Ensure prelink is disabled       $SEC\n"
 else printf "\n$CIS 1.6.3 Ensure prelink is disabled     $NO_SEC
 Description: prelinkis a program that modifies ELF shared libraries and ELF dynamically linked
@@ -262,7 +262,7 @@ file. The system provides the ability to set a soft limit for core dumps, but th
 overridden by the user.\n"
 fi
 
-if  dpkg -s apparmor apparmor-utils|grep -oi 'Status: install ok installed'|wc -l| grep -vq '0' || apparmor_status|grep -io 'apparmor module is loaded'|wc -l|grep -vq '0' ; then 
+if  dpkg -s apparmor apparmor-utils 2>&1|grep -oi 'Status: install ok installed'|wc -l| grep -vq '0' || apparmor_status|grep -io 'apparmor module is loaded'|wc -l|grep -vq '0' ; then 
 printf "\n$CIS 1.7.1.(1|4) Ensure AppArmor is installed      $SEC\n"
 else printf "\n$CIS 1.7.1.(1|4) Ensure AppArmor is installed     $NO_SEC
 Description: AppArmor provides Mandatory Access Controls.
@@ -286,7 +286,7 @@ fi
 
 
 
-if  systemctl is-enabled systemd-timesyncd|grep -oi 'enabled'|wc -l| grep -vq '0' || dpkg -s chrony|grep -io 'Status: install ok installed'|wc -l|grep -vq '0'|| dpkg -s ntp|grep -io 'Status: install ok installed'|wc -l|grep -vq '0'|| timedatectl status|grep -io 'System clock synchronized:\|NTP enabled:'|wc -l|grep -vq '0'; then 
+if  systemctl is-enabled systemd-timesyncd|grep -oi 'enabled'|wc -l| grep -vq '0' || dpkg -s chrony 2>&1|grep -io 'Status: install ok installed'|wc -l|grep -vq '0'|| dpkg -s ntp 2>&1|grep -io 'Status: install ok installed'|wc -l|grep -vq '0'|| timedatectl status|grep -io 'System clock synchronized:\|NTP enabled:'|wc -l|grep -vq '0'; then 
 printf "\n$CIS 2.2.1.(1|2) Ensure time (synchronization|configured) is in use       $SEC\n"
 else printf "\n$CIS 2.2.1.(1|2) Ensure time (synchronization|configured) is in use     $NO_SEC
 Description:System time should be synchronized between all systems in an environment. This is
@@ -314,41 +314,120 @@ and print them to local printers. It also provides a web based remote administra
 capability.\n"
 fi
 
-if  systemctl is-enabled slapd 2>&1|grep -oi 'enable'|wc -l|grep -q '0' ; then 
-printf "\n$CIS 2.2.6 Ensure LDAP server is not enabled       $SEC\n"
-else printf "\n$CIS 2.2.6 Ensure LDAP server is not enabled     $NO_SEC
+if  systemctl is-enabled slapd 2>&1|grep -oi 'enable'|wc -l|grep -q '0' || dpkg -s ldap-utils 2>&1 |grep -oi 'not installed'|wc -l| grep -vq '0' ; then 
+printf "\n$CIS (2.2.6|2.3.5) Ensure LDAP server is not enabled       $SEC\n"
+else printf "\n$CIS (2.2.6|2.3.5) Ensure LDAP server is not enabled     $NO_SEC
 Description: The Lightweight Directory Access Protocol (LDAP) was introduced as a replacement for
 NIS/YP. It is a service that provides a method for looking up information from a central
 database.\n"
 fi
 
 if  systemctl is-enabled nfs-server 2>&1|grep -oi 'enable'|wc -l|grep -q '0' || systemctl is-enabled rpcbind|grep -oi 'enable'|wc -l|grep -q '0'; then 
-printf "\n$CIS 2.2.7 Ensure NFS and RPC are not enabled       $SEC\n"
-else printf "\n$CIS 2.2.7 Ensure NFS and RPC are not enabled     $NO_SEC
+printf "\n$CIS 2.2.7 Ensure NFS and RPC are not enabled  $SEC\n"
+else printf "\n$CIS 2.2.7 Ensure NFS and RPC are not enabled  $NO_SEC
 Description: The Network File System (NFS) is one of the first and most widely distributed file systems
 in the UNIX environment. It provides the ability for systems to mount file systems of other
 servers through the network.\n"
 fi
 
 if  systemctl is-enabled bind9 2>&1|grep -oi 'enable'|wc -l|grep -q '0' ; then 
-printf "\n$CIS 2.2.8 Ensure DNS Server is not enabled       $SEC\n"
-else printf "\n$CIS 2.2.8 Ensure DNS Server is not enabled     $NO_SEC
+printf "\n$CIS 2.2.8 Ensure DNS Server is not enabled  $SEC\n"
+else printf "\n$CIS 2.2.8 Ensure DNS Server is not enabled  $NO_SEC
 Description: The Domain Name System (DNS) is a hierarchical naming system that maps names to IP
 addresses for computers, services and other resources connected to a network.\n"
 fi
 
 if  systemctl is-enabled vsftpd 2>&1|grep -oi 'enable'|wc -l|grep -q '0' ; then 
-printf "\n$CIS 2.2.9 Ensure FTP Server is not enabled       $SEC\n"
-else printf "\n$CIS 2.2.9 Ensure FTP Server is not enabled     $NO_SEC
+printf "\n$CIS 2.2.9 Ensure FTP Server is not enabled  $SEC\n"
+else printf "\n$CIS 2.2.9 Ensure FTP Server is not enabled  $NO_SEC
 Description: The File Transfer Protocol (FTP) provides networked computers with the ability to transfer
 files.\n"
 fi
 
 if  systemctl is-enabled apache2 2>&1|grep -oi 'enable'|wc -l|grep -q '0' ; then 
-printf "\n$CIS 2.2.10 Ensure HTTP server is not enabled        $SEC\n"
-else printf "\n$CIS 2.2.10 Ensure HTTP server is not enabled      $NO_SEC
+printf "\n$CIS 2.2.10 Ensure HTTP server is not enabled  $SEC\n"
+else printf "\n$CIS 2.2.10 Ensure HTTP server is not enabled  $NO_SEC
 Description: HTTP or web servers provide the ability to host web site content.\n"
 fi
+
+if  systemctl is-enabled dovecot 2>&1|grep -oi 'enable'|wc -l|grep -q '0' ; then 
+printf "\n$CIS 2.2.11 Ensure email services are not enabled  $SEC\n"
+else printf "\n$CIS 2.2.11 Ensure email services are not enabled  $NO_SEC
+Description: dovecot is an open source mail submission and transport server for Linux based systems.\n"
+fi
+
+if  systemctl is-enabled smbd 2>&1|grep -oi 'enable'|wc -l|grep -q '0' ; then 
+printf "\n$CIS 2.2.12 Ensure Samba is not enabled  $SEC\n"
+else printf "\n$CIS 2.2.12 Ensure Samba is not enabled  $NO_SEC
+Description: The Samba daemon allows system administrators to configure their Linux systems to share
+file systems and directories with Windows desktops. Samba will advertise the file systems
+and directories via the Server Message Block (SMB) protocol. Windows desktop users will
+be able to mount these directories and file systems as letter drives on their systems.\n"
+fi
+
+if  systemctl is-enabled squid 2>&1|grep -oi 'enable'|wc -l|grep -q '0' ; then 
+printf "\n$CIS 2.2.13 Ensure HTTP Proxy Server is not enabled  $SEC\n"
+else printf "\n$CIS 2.2.13 Ensure HTTP Proxy Server is not enabled  $NO_SEC
+Description: Squid is a standard proxy server used in many distributions and environments.\n"
+fi
+
+if  systemctl is-enabled snmpd 2>&1|grep -oi 'enable'|wc -l|grep -q '0' ; then 
+printf "\n$CIS 2.2.14 Ensure SNMP Server is not enabled  $SEC\n"
+else printf "\n$CIS 2.2.14 Ensure SNMP Server is not enabled  $NO_SEC
+Description: The Simple Network Management Protocol (SNMP) server is used to listen for SNMP
+commands from an SNMP management system, execute the commands or collect the
+information and then send results back to the requesting system.\n"
+fi
+
+if   ss -lntu | grep -E ':25\s' | grep -E -v '\s(127.0.0.1|::1):25\s'|wc -l|grep -q '0' ; then 
+printf "\n$CIS 2.2.15 Ensure mail transfer agent is configured for local-only mode  $SEC\n"
+else printf "\n$CIS 2.2.15 Ensure mail transfer agent is configured for local-only mode  $NO_SEC
+Description: Mail Transfer Agents (MTA), such as sendmail and Postfix, are used to listen for incoming
+mail and transfer the messages to the appropriate user or mail server. If the system is not
+intended to be a mail server, it is recommended that the MTA be configured to only process
+local mail.\n"
+fi
+
+if  systemctl is-enabled rsync 2>&1|grep -oi 'enable'|wc -l|grep -q '0' ; then 
+printf "\n$CIS 2.2.16 Ensure rsync service is not enabled   $SEC\n"
+else printf "\n$CIS 2.2.16 Ensure rsync service is not enabled   $NO_SEC
+Description: The rsyncd service can be used to synchronize files between systems over network links.\n"
+fi
+
+if  systemctl is-enabled nis 2>&1|grep -oi 'enable'|wc -l|grep -q '0' || dpkg -s nis 2>&1|grep -oi 'not installed'|wc -l| grep -vq '0' ; then 
+printf "\n$CIS (2.2.17|2.3.1) Ensure NIS Server is not enabled   $SEC\n"
+else printf "\n$CIS (2.2.17|2.3.1) Ensure NIS Server is not enabled   $NO_SEC
+Description: The Network Information Service (NIS) (formally known as Yellow Pages) is a client-server
+directory service protocol for distributing system configuration files. The NIS server is a
+collection of programs that allow for the distribution of configuration files.\n"
+fi
+
+if  dpkg -s rsh-client 2>&1|grep -oi 'not installed'|wc -l| grep -vq '0' ; then 
+printf "\n$CIS 2.3.2 Ensure rsh client is not installed   $SEC\n"
+else printf "\n$CIS 2.3.2 Ensure rsh client is not installed   $NO_SEC
+Description: The rsh package contains the client commands for the rsh services.\n"
+fi
+
+if  dpkg -s talk 2>&1|grep -oi 'not installed'|wc -l| grep -vq '0' ; then 
+printf "\n$CIS 2.3.3 Ensure talk client is not installed   $SEC\n"
+else printf "\n$CIS 2.3.3 Ensure talk client is not installed   $NO_SEC
+Description: The talk software makes it possible for users to send and receive messages across systems
+through a terminal session. The talk client, which allows initialization of talk sessions, is
+installed by default.\n"
+fi
+
+if  dpkg -s telnet 2>&1|grep -oi 'not installed'|wc -l| grep -vq '0' ; then 
+printf "\n$CIS 2.3.4 Ensure telnet client is not installed    $SEC\n"
+else printf "\n$CIS 2.3.4 Ensure telnet client is not installed    $NO_SEC
+Description: The telnet package contains the telnet client, which allows users to start connections to
+other systems via the telnet protocol.\n"
+fi
+
+
+
+
+
+
 
 
 
