@@ -108,6 +108,190 @@ else printf "\n$CIS 1.1.10 Ensure noexec option set on /var/tmp partition   $NO_
 Description: The noexec mount option specifies that the filesystem cannot contain executable binaries.\n"
 fi
 
+if mount | grep /var/log|grep -io '/dev/xvdh1 on /var/log type ext4 (rw,relatime,data=ordered)'| wc -l| grep -vq '0' ; then 
+printf "\n$CIS 1.1.11 Ensure separate partition exists for /var/log     $SEC\n"
+else printf "\n$CIS 1.1.11 Ensure separate partition exists for /var/log   $NO_SEC
+Description: The /var/log directory is used by system services to store log data .\n"
+fi
+
+if mount | grep /var/log/audit|grep -io '/dev/xvdi1 on /var/log/audit type ext4 (rw,relatime,data=ordered)'| wc -l| grep -vq '0' ; then 
+printf "\n$CIS 1.1.12 Ensure separate partition exists for /var/log/audit     $SEC\n"
+else printf "\n$CIS 1.1.12 Ensure separate partition exists for /var/log/audit   $NO_SEC
+Description: The auditing daemon, auditd, stores log data in the /var/log/auditdirectory.\n"
+fi
+
+if mount | grep /home|grep -io '/dev/xvdf1 on /home type ext4 (rw,nodev,relatime,data=ordered)'| wc -l| grep -vq '0' ; then 
+printf "\n$CIS 1.1.13 Ensure separate partition exists for /home     $SEC\n"
+else printf "\n$CIS 1.1.13 Ensure separate partition exists for /home   $NO_SEC
+Description: The /home directory is used to support disk storage needs of local users.\n"
+fi
+
+if mount | grep -E '\s/home\s' | grep -v nodev| wc -l| grep -q '0' ; then 
+printf "\n$CIS 1.1.14 Ensure nodev option set on /home partition      $SEC\n"
+else printf "\n$CIS 1.1.14 Ensure nodev option set on /home partition    $NO_SEC
+Description: The nodev mount option specifies that the filesystem cannot contain special devices.\n"
+fi
+
+if mount | grep -E '\s/dev/shm\s' | grep -v nodev| wc -l| grep -q '0' ; then 
+printf "\n$CIS 1.1.15 Ensure nodev option set on /dev/shm partition      $SEC\n"
+else printf "\n$CIS 1.1.15 Ensure nodev option set on /dev/shm partition    $NO_SEC
+Description: The nodev mount option specifies that the filesystem cannot contain special devices.\n"
+fi
+
+if mount | grep -E '\s/dev/shm\s' | grep -v nosuid| wc -l| grep -q '0' ; then 
+printf "\n$CIS 1.1.16 Ensure nosuid option set on /dev/shm partition       $SEC\n"
+else printf "\n$CIS 1.1.16 Ensure nosuid option set on /dev/shm partition     $NO_SEC
+Description: The nosuid mount option specifies that the filesystem cannot contain setuid files.\n"
+fi
+
+if mount | grep -E '\s/dev/shm\s' | grep -v noexec| wc -l| grep -q '0' ; then 
+printf "\n$CIS 1.1.17 Ensure noexec option set on /dev/shm partition       $SEC\n"
+else printf "\n$CIS 1.1.17 Ensure noexec option set on /dev/shm partition     $NO_SEC
+Description: The noexec mount option specifies that the filesystem cannot contain executable binaries.\n"
+fi
+
+if mount|grep -i "nodev"| wc -l| grep -vq '0' && mount|grep -i "nosuid"| wc -l| grep -vq '0' && mount|grep -i "noexec"| wc -l| grep -vq '0'; then 
+printf "\n$CIS 1.1.(18|19|20) Ensure nodev option set on removable media partitions       $SEC\n"
+else printf "\n$CIS 1.1.(18|19|20) Ensure nodev option set on removable media partitions     $NO_SEC
+Description: The nodev mount option specifies that the filesystem cannot contain special devices.
+The nosuid mount option specifies that the filesystem cannot contain setuid files.
+The noexec mount option specifies that the filesystem cannot contain executable binaries.\n"
+fi
+
+if  systemctl is-enabled autofs|grep -io 'disabled'| wc -l| grep -vq '0' || dpkg -s autofs|grep -io 'package `autofs` is not installed'| wc -l| grep -vq '0'; then 
+printf "\n$CIS 1.1.22 Disable Automounting       $SEC\n"
+else printf "\n$CIS 1.1.22 Disable Automounting     $NO_SEC
+Description: autofs allows automatic mounting of devices, typically including CD/DVDs and USB drives.\n"
+fi
+
+if  modprobe -n -v usb-storage|grep -io 'install /bin/true'| wc -l| grep -vq '0' || lsmod | grep usb-storage|wc -l| grep -q '0'; then 
+printf "\n$CIS 1.1.23 Disable USB Storage        $SEC\n"
+else printf "\n$CIS 1.1.23 Disable USB Storage      $NO_SEC
+Description: USB storage provides a means to transfer and store files insuring persistence and
+availability of the files independent of network connection status. Its popularity and utility
+has led to USB-based malware being a simple and common means for network infiltration
+and a first step to establishing a persistent threat within a networked environment.\n"
+fi
+
+if dpkg -s sudo|grep -io 'Status: install ok installed'| wc -l| grep -vq '0' || dpkg -s sudo-ldap|grep -io 'Status: install ok installed'| wc -l| grep -vq '0'; then 
+printf "\n$CIS 1.3.1 Ensure sudo is installed       $SEC\n"
+else printf "\n$CIS 1.3.1 Ensure sudo is installed     $NO_SEC
+Description: sudo allows a permitted user to execute a command as the superuser or another user, as
+specified by the security policy. The invoking user's real (not effective) user ID is used to
+determine the user name with which to query the security policy.\n"
+fi
+
+if   grep -Ei '^\s*Defaults\s+([^#]+,\s*)?use_pty(,\s+\S+\s*)*(\s+#.*)?$' /etc/sudoers /etc/sudoers.d/*|grep -io 'Defaults use_pty'| wc -l| grep -vq '0' ; then 
+printf "\n$CIS 1.3.2 Ensure sudo commands use pty        $SEC\n"
+else printf "\n$CIS 1.3.2 Ensure sudo commands use pty      $NO_SEC
+Description: sudo can be configured to run only from a psuedo-pty.\n"
+fi
+
+if  grep -Ei '^\s*Defaults\s+logfile=\S+' /etc/sudoers /etc/sudoers.d/*|grep -io 'Defaults logfile='| wc -l| grep -vq '0' ; then 
+printf "\n$CIS 1.3.3 Ensure sudo log file exists       $SEC\n"
+else printf "\n$CIS 1.3.3 Ensure sudo log file exists     $NO_SEC
+Description: sudo can use a custom log file.\n"
+fi
+
+if  stat /boot/grub/grub.cfg|grep -io 'Access: (0400/-r--------)'| wc -l| grep -vq '0' ; then 
+printf "\n$CIS 1.5.1 Ensure permissions on bootloader config are configured       $SEC\n"
+else printf "\n$CIS 1.5.1 Ensure permissions on bootloader config are configured     $NO_SEC
+Description: The grub configuration file contains information on boot settings and passwords for
+unlocking boot options. The grub configuration is usually grub.cfg stored in /boot/grub/.\n"
+fi
+
+if   grep "^set superusers" /boot/grub/grub.cfg|grep -io 'set superusers='| wc -l| grep -vq '0'||grep "^password" /boot/grub/grub.cfg|grep -io 'password_pbkdf2'|wc -l| grep -vq '0' ; then 
+printf "\n$CIS 1.5.2 Ensure bootloader password is set       $SEC\n"
+else printf "\n$CIS 1.5.2 Ensure bootloader password is set     $NO_SEC
+Description: Setting the boot loader password will require that anyone rebooting the system must enter
+a password before being able to set command line boot parameters.\n"
+fi
+
+if  grep '^root:[*\!]:' /etc/shadow|grep -i 'root'|wc -l| grep -vq '0' ; then 
+printf "\n$CIS 1.5.3 Ensure authentication required for single user mode       $SEC\n"
+else printf "\n$CIS 1.5.3 Ensure authentication required for single user mode     $NO_SEC
+Description: Single user mode is used for recovery when the system detects an issue during boot or by
+manual selection from the bootloader.\n"
+fi
+
+if   grep "^PROMPT_FOR_CONFIRM=" /etc/sysconfig/boot|grep -oi 'PROMPT_FOR_CONFIRM="no"'|wc -l| grep -vq '0' ; then 
+printf "\n$CIS 1.5.4 Ensure interactive boot is not enabled       $SEC\n"
+else printf "\n$CIS 1.5.4 Ensure interactive boot is not enabled     $NO_SEC
+Description: Interactive boot allows console users to interactively select which services start on boot.
+Not all distributions support this capability.
+The PROMPT_FOR_CONFIRM option provides console users the ability to interactively boot the
+system and select which services to start on boot .\n"
+fi
+
+if  journalctl | grep 'protection: active'|grep -io 'kernel: NX (Execute Disable) protection: active'| wc -l| grep -vq '0' ||[[ -n $(grep noexec[0-9]*=off /proc/cmdline) || -z $(grep -E -i ' (pae|nx)
+' /proc/cpuinfo) || -n $(grep '\sNX\s.*\sprotection:\s' /var/log/dmesg | grep
+-v active) ]] && echo "NX Protection is not active"|wc -l| grep -q '0'; then 
+printf "\n$CIS 1.6.1 Ensure XD/NX support is enabled        $SEC\n"
+else printf "\n$CIS 1.6.1 Ensure XD/NX support is enabled      $NO_SEC
+Description: Recent processors in the x86 family support the ability to prevent code execution on a per
+memory page basis. Generically and on AMD processors, this ability is called No Execute
+(NX), while on Intel processors it is called Execute Disable (XD). This ability can help
+prevent exploitation of buffer overflow vulnerabilities and should be activated whenever
+possible. Extra steps must be taken to ensure that this protection is enabled, particularly on
+32-bit x86 systems. Other processors, such as Itanium and POWER, have included such
+support since inception and the standard kernel for those platforms supports the feature.\n"
+fi
+
+if  sysctl kernel.randomize_va_space|grep -oi 'kernel.randomize_va_space = 2'|wc -l| grep -vq '0' || grep "kernel\.randomize_va_space" /etc/sysctl.conf /etc/sysctl.d/*|grep -io 'kernel.randomize_va_space = 2'|wc -l| grep -vq '0'; then 
+printf "\n$CIS 1.6.2 Ensure address space layout randomization (ASLR) is enabled       $SEC\n"
+else printf "\n$CIS 1.6.2 Ensure address space layout randomization (ASLR) is enabled     $NO_SEC
+Description: Address space layout randomization (ASLR) is an exploit mitigation technique which
+randomly arranges the address space of key data areas of a process.\n"
+fi
+
+if  dpkg -s prelink|grep -oi 'not installed'|wc -l| grep -vq '0' ; then 
+printf "\n$CIS 1.6.3 Ensure prelink is disabled       $SEC\n"
+else printf "\n$CIS 1.6.3 Ensure prelink is disabled     $NO_SEC
+Description: prelinkis a program that modifies ELF shared libraries and ELF dynamically linked
+binaries in such a way that the time needed for the dynamic linker to perform relocations
+at startup significantly decreases.\n"
+fi
+
+if  grep "hard core" /etc/security/limits.conf /etc/security/limits.d/*|grep -oi '* hard core 0'|wc -l| grep -vq '0' || sysctl fs.suid_dumpable|grep -io 'fs.suid_dumpable = 0
+'|wc -l| grep -vq '0'|grep "fs\.suid_dumpable" /etc/sysctl.conf /etc/sysctl.d/*|grep -io 'fs.suid_dumpable = 0'|wc -l| grep -vq '0'||systemctl is-enabled coredump.service|grep -io 'enabled\|disabled'|wc -l| grep -vq '0'; then 
+printf "\n$CIS 1.6.4 Ensure core dumps are restricted       $SEC\n"
+else printf "\n$CIS 1.6.4 Ensure core dumps are restricted     $NO_SEC
+Description: A core dump is the memory of an executable program. It is generally used to determine
+why a program aborted. It can also be used to glean confidential information from a core
+file. The system provides the ability to set a soft limit for core dumps, but this can be
+overridden by the user.\n"
+fi
+
+if  dpkg -s apparmor apparmor-utils|grep -oi 'Status: install ok installed'|wc -l| grep -vq '0' || apparmor_status|grep -io 'apparmor module is loaded'|wc -l|grep -vq '0' ; then 
+printf "\n$CIS 1.7.1.(1|4) Ensure AppArmor is installed      $SEC\n"
+else printf "\n$CIS 1.7.1.(1|4) Ensure AppArmor is installed     $NO_SEC
+Description: AppArmor provides Mandatory Access Controls.
+AppArmor profiles define what resources applications are able to access.\n"
+fi
+
+if grep "^\s*linux" /boot/grub/grub.cfg | grep -v "apparmor=1" | grep -v '/boot/memtest86+.bin'|wc -l| grep -q '0' || grep "^\s*linux" /boot/grub/grub.cfg | grep -v "security=apparmor" | grep -v '/boot/memtest86+.bin'|wc -l| grep -q '0'; then 
+printf "\n$CIS 1.7.1.2 Ensure AppArmor is enabled in the bootloader configuration      $SEC\n"
+else printf "\n$CIS 1.7.1.2 Ensure AppArmor is enabled in the bootloader configuration     $NO_SEC
+Description: Configure AppArmor to be enabled at boot time and verify that it has not been overwritten
+by the bootloader boot parameters..\n"
+fi
+
+
+if  apparmor_status | grep -oi 'profiles\|processes'|grep -io 'profiles are loaded\| processes have profiles defined'|wc -l| grep -vq '0' ; then 
+printf "\n$CIS 1.7.1.3 Ensure all AppArmor Profiles are in enforce or complain mode      $SEC\n"
+else printf "\n$CIS 1.7.1.3 Ensure all AppArmor Profiles are in enforce or complain mode     $NO_SEC
+Description: AppArmor profiles define what resources applications are able to access..\n"
+fi
+
+
+
+
+
+
+
+
+
+
 
 
 
