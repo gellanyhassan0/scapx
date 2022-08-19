@@ -518,8 +518,46 @@ else printf "\n$CIS 3.2.9 Ensure IPv6 router advertisements are not accepted    
 Description: This setting disables the system's ability to accept IPv6 router advertisements..\n"
 fi
 
+if  dpkg -s ufw | grep -i status 2>&1|grep -oi 'Status: install ok installed'|wc -l| grep -vq '0' || dpkg -s nftables | grep -i status 2>&1|grep -io 'Status: install ok installed'|wc -l| grep -vq '0'|| dpkg -s iptables | grep -i status 2>&1|grep -io 'Status: install ok installed'|wc -l| grep -vq '0' && systemctl is-enabled ufw 2>&1|grep -io 'enabled'|wc -l| grep -vq '0' &&  ufw status | grep Status|grep -io 'Status: active'|wc -l| grep -vq '0'   ; then 
+printf "\n$CIS (3.5.1.1|3.5.2.1) Ensure a Firewall package is installed   $SEC\n"
+else printf "\n$CIS (3.5.1.1|3.5.2.1) Ensure a Firewall package is installed   $NO_SEC
+Description: A Firewall package should be selected. Most firewall configuration utilities operate as a
+front end to nftables or iptables.\n"
+fi
+
+if   awk '/^\s*UID_MIN/{print $2}' /etc/login.defs 2>&1|grep -oi '1000'|wc -l| grep -vq '0' &&  dpkg -s rsyslog 2>&1|grep -io 'Status: install ok installed'|wc -l| grep -vq '0' &&  systemctl is-enabled rsyslog 2>&1|grep -io 'enabled'|wc -l| grep -vq '0' &&  grep ^\$FileCreateMode /etc/rsyslog.conf /etc/rsyslog.d/*.conf 2>&1|grep -io '$FileCreateMode 0640'|wc -l| grep -vq '0' ; then 
+printf "\n$CIS (4.1.10|4.2.1.1|4.2.1.2|4.2.1.4 ) Ensure unsuccessful unauthorized file access attempts arecollected  $SEC\n"
+else printf "\n$CIS (4.1.10|4.2.1.1|4.2.1.2|4.2.1.4 ) Ensure unsuccessful unauthorized file access attempts arecollected  $NO_SEC
+Description:Monitor changes to file permissions, attributes, ownership and group. The parameters in
+this section track changes for system calls that affect file permissions and attributes. The
+chmod , fchmod and fchmodat system calls affect the permissions associated with a file. The
+chown , fchown , fchownat and lchown system calls affect owner and group attributes on a
+file. The setxattr , lsetxattr , fsetxattr (set extended file attributes) and removexattr ,
+lremovexattr , fremovexattr (remove extended file attributes) control extended file
+attributes. In all cases, an audit record will only be written for non-system user ids (auid >=
+1000) and will ignore Daemon events (auid = 4294967295). All audit records will be
+tagged with the identifier 'perm_mod'.
+
+Monitor for unsuccessful attempts to access files. The parameters below are associated
+with system calls that control creation ( creat ), opening ( open , openat ) and truncation (
+truncate , ftruncate ) of files. An audit log record will only be written if the user is a non-
+privileged user (auid > = 1000), is not a Daemon event (auid=4294967295) and if the
+system call returned EACCES (permission denied to the file) or EPERM (some other
+permanent error associated with the specific system call). All audit records will be tagged
+with the identifier '.access'\n
+
+rsyslog will create logfiles that do not already exist on the system. This setting controls
+what permissions will be applied to these newly created files"
+fi
 
 
+#find /var/log -type f -exec chmod g-wx,o-rwx "{}" + -o -type d -exec chmod g-w,o-rwx "{}" + 2>&1
+if  find /var/log -type f -ls 2>&1|grep -oi '-rw-r--r--'|wc -l| grep -q '0' ; then 
+printf "\n$CIS 4.2.3 Ensure permissions on all logfiles are configured   $SEC\n"
+else printf "\n$CIS 4.2.3 Ensure permissions on all logfiles are configured   $NO_SEC
+Description: Log files stored in /var/log/ contain logged information from many services on the system,
+or on log hosts others as well.\n"
+fi
 
 
 
