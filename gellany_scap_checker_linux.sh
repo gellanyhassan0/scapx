@@ -423,8 +423,19 @@ Description: The telnet package contains the telnet client, which allows users t
 other systems via the telnet protocol.\n"
 fi
 
+if  sysctl net.ipv4.conf.all.send_redirects 2>&1|grep -oi 'net.ipv4.conf.all.send_redirects = 0'|wc -l| grep -vq '0' || sysctl net.ipv4.conf.default.send_redirects 2>&1|grep -io 'net.ipv4.conf.default.send_redirects = 0'|wc -l| grep -vq '0' ||  grep "net\.ipv4\.conf\.all\.send_redirects" /etc/sysctl.conf/etc/sysctl.d/* 2>&1|grep -io 'net.ipv4.conf.all.send_redirects = 0'|wc -l| grep -vq '0' || grep "net\.ipv4\.conf\.default\.send_redirects" /etc/sysctl.conf/etc/sysctl.d/* 2>&1|grep -io 'net.ipv4.conf.default.send_redirects= 0'|wc -l| grep -vq '0'; then 
+printf "\n$CIS 3.1.1 Ensure packet redirect sending is disabled     $SEC\n"
+else printf "\n$CIS 3.1.1 Ensure packet redirect sending is disabled     $NO_SEC
+Description: ICMP Redirects are used to send routing information to other hosts. As a host itself does
+not act as a router (in a host only configuration), there is no need to send redirects..\n"
+fi
 
-
+if  sysctl net.ipv4.ip_forward 2>&1|grep -io 'net.ipv4.ip_forward = 0'| wc -l| grep -vq '0' || grep -E -s "^\s*net\.ipv4\.ip_forward\s*=\s*1" /etc/sysctl.conf/etc/sysctl.d/*.conf /usr/lib/sysctl.d/*.conf /run/sysctl.d/*.conf 2>&1|wc -l| grep -q '0'|sysctl net.ipv6.conf.all.forwarding 2>&1|grep -io 'net.ipv6.conf.all.forwarding = 0'|wc -l| grep -vq '0'| grep -E -s "^\s*net\.ipv6\.conf\.all\.forwarding\s*=\s*1" /etc/sysctl.conf/etc/sysctl.d/*.conf /usr/lib/sysctl.d/*.conf /run/sysctl.d/*.conf 2>&1|wc -l| grep -q '0' ; then 
+printf "\n$CIS 3.1.2 Ensure IP forwarding is disabled    $SEC\n"
+else printf "\n$CIS 3.1.2 Ensure IP forwarding is disabled     $NO_SEC
+Description: The net.ipv4.ip_forward and net.ipv6.conf.all.forwarding flags are used to tell the
+system whether it can forward packets or not.\n"
+fi
 
 
 
