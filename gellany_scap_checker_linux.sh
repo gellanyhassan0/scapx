@@ -286,6 +286,69 @@ fi
 
 
 
+if  systemctl is-enabled systemd-timesyncd|grep -oi 'enabled'|wc -l| grep -vq '0' || dpkg -s chrony|grep -io 'Status: install ok installed'|wc -l|grep -vq '0'|| dpkg -s ntp|grep -io 'Status: install ok installed'|wc -l|grep -vq '0'|| timedatectl status|grep -io 'System clock synchronized:\|NTP enabled:'|wc -l|grep -vq '0'; then 
+printf "\n$CIS 2.2.1.(1|2) Ensure time (synchronization|configured) is in use       $SEC\n"
+else printf "\n$CIS 2.2.1.(1|2) Ensure time (synchronization|configured) is in use     $NO_SEC
+Description:System time should be synchronized between all systems in an environment. This is
+typically done by establishing an authoritative time server or set of servers and having all
+systems synchronize their clocks to them.\n"
+fi
+
+
+if  systemctl is-enabled avahi-daemon 2>&1|grep -oi 'enable'|wc -l|grep -q '0'; then 
+printf "\n$CIS 2.2.3 Ensure Avahi Server is not enabled       $SEC\n"
+else printf "\n$CIS 2.2.3 Ensure Avahi Server is not enabled     $NO_SEC
+Description: Avahi is a free zeroconf implementation, including a system for multicast DNS/DNS-SD
+service discovery. Avahi allows programs to publish and discover services and hosts
+running on a local network with no specific configuration. For example, a user can plug a
+computer into a network and Avahi automatically finds printers to print to, files to look at
+and people to talk to, as well as network services running on the machine.\n"
+fi
+
+if  systemctl is-enabled cups 2>&1|grep -oi 'enable'|wc -l|grep -q '0' ; then 
+printf "\n$CIS 2.2.4 Ensure CUPS is not enabled       $SEC\n"
+else printf "\n$CIS 2.2.4 Ensure CUPS is not enabled     $NO_SEC
+Description: The Common Unix Print System (CUPS) provides the ability to print to both local and
+network printers. A system running CUPS can also accept print jobs from remote systems
+and print them to local printers. It also provides a web based remote administration
+capability.\n"
+fi
+
+if  systemctl is-enabled slapd 2>&1|grep -oi 'enable'|wc -l|grep -q '0' ; then 
+printf "\n$CIS 2.2.6 Ensure LDAP server is not enabled       $SEC\n"
+else printf "\n$CIS 2.2.6 Ensure LDAP server is not enabled     $NO_SEC
+Description: The Lightweight Directory Access Protocol (LDAP) was introduced as a replacement for
+NIS/YP. It is a service that provides a method for looking up information from a central
+database.\n"
+fi
+
+if  systemctl is-enabled nfs-server 2>&1|grep -oi 'enable'|wc -l|grep -q '0' || systemctl is-enabled rpcbind|grep -oi 'enable'|wc -l|grep -q '0'; then 
+printf "\n$CIS 2.2.7 Ensure NFS and RPC are not enabled       $SEC\n"
+else printf "\n$CIS 2.2.7 Ensure NFS and RPC are not enabled     $NO_SEC
+Description: The Network File System (NFS) is one of the first and most widely distributed file systems
+in the UNIX environment. It provides the ability for systems to mount file systems of other
+servers through the network.\n"
+fi
+
+if  systemctl is-enabled bind9 2>&1|grep -oi 'enable'|wc -l|grep -q '0' ; then 
+printf "\n$CIS 2.2.8 Ensure DNS Server is not enabled       $SEC\n"
+else printf "\n$CIS 2.2.8 Ensure DNS Server is not enabled     $NO_SEC
+Description: The Domain Name System (DNS) is a hierarchical naming system that maps names to IP
+addresses for computers, services and other resources connected to a network.\n"
+fi
+
+if  systemctl is-enabled vsftpd 2>&1|grep -oi 'enable'|wc -l|grep -q '0' ; then 
+printf "\n$CIS 2.2.9 Ensure FTP Server is not enabled       $SEC\n"
+else printf "\n$CIS 2.2.9 Ensure FTP Server is not enabled     $NO_SEC
+Description: The File Transfer Protocol (FTP) provides networked computers with the ability to transfer
+files.\n"
+fi
+
+if  systemctl is-enabled apache2 2>&1|grep -oi 'enable'|wc -l|grep -q '0' ; then 
+printf "\n$CIS 2.2.10 Ensure HTTP server is not enabled        $SEC\n"
+else printf "\n$CIS 2.2.10 Ensure HTTP server is not enabled      $NO_SEC
+Description: HTTP or web servers provide the ability to host web site content.\n"
+fi
 
 
 
