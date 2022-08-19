@@ -437,6 +437,93 @@ Description: The net.ipv4.ip_forward and net.ipv6.conf.all.forwarding flags are 
 system whether it can forward packets or not.\n"
 fi
 
+if  sysctl net.ipv4.conf.all.accept_source_route 2>&1|grep -oi 'sysctl net.ipv4.conf.all.accept_source_route'|wc -l| grep -vq '0' ||  sysctl net.ipv4.conf.default.accept_source_route 2>&1|grep -oi 'net.ipv4.conf.default.accept_source_route = 0'|wc -l| grep -vq '0'|| grep "net\.ipv4\.conf\.all\.accept_source_route" /etc/sysctl.conf/etc/sysctl.d/* 2>&1|grep -io 'net.ipv4.conf.all.accept_source_route= 0' ||  grep "net\.ipv4\.conf\.default\.accept_source_route" /etc/sysctl.conf/etc/sysctl.d/* 2>&1|grep -io 'net.ipv4.conf.default.accept_source_route= 0'|wc -l| grep -vq '0'|| sysctl net.ipv6.conf.all.accept_source_route 2>&1|grep -io 'net.ipv6.conf.all.accept_source_route = 0'|wc -l| grep -vq '0'|| sysctl net.ipv6.conf.default.accept_source_route 2>&1|grep -io 'net.ipv6.conf.default.accept_source_route = 0'|wc -l| grep -vq '0'|| grep "net\.ipv6\.conf\.all\.accept_source_route" /etc/sysctl.conf/etc/sysctl.d/* 2>&1|grep -io 'net.ipv4.conf.all.accept_source_route= 0'|wc -l| grep -vq '0'||  grep "net\.ipv6\.conf\.default\.accept_source_route" /etc/sysctl.conf/etc/sysctl.d/* 2>&1|grep -io 'net.ipv6.conf.default.accept_source_route= 0'|wc -l| grep -vq '0' ; then 
+printf "\n$CIS 3.2.1 Ensure source routed packets are not accepted    $SEC\n"
+else printf "\n$CIS 3.2.1 Ensure source routed packets are not accepted    $NO_SEC
+Description: In networking, source routing allows a sender to partially or fully specify the route packets
+take through a network. In contrast, non-source routed packets travel a path determined
+by routers in the network. In some cases, systems may not be routable or reachable from
+some locations (e.g. private addresses vs. Internet routable), and so source routed packets
+would need to be used.\n"
+fi
+
+if  sysctl net.ipv4.conf.all.accept_redirects 2>&1|grep -oi 'net.ipv4.conf.all.accept_redirects = 0'|wc -l| grep -vq '0'||  sysctl net.ipv4.conf.default.accept_redirects 2>&1|grep -io 'net.ipv4.conf.default.accept_redirects = 0'|wc -l| grep -vq '0'|| grep "net\.ipv4\.conf\.all\.accept_redirects" /etc/sysctl.conf/etc/sysctl.d/* 2>&1|grep -io 'net.ipv4.conf.all.accept_redirects= 0'|wc -l| grep -vq '0'||grep "net\.ipv4\.conf\.default\.accept_redirects" /etc/sysctl.conf/etc/sysctl.d/* 2>&1|grep -io 'net.ipv4.conf.default.accept_redirects= 0'|wc -l| grep -vq '0'||sysctl net.ipv6.conf.all.accept_redirects 2>&1|grep -io 'net.ipv6.conf.all.accept_redirects = 0'|wc -l| grep -vq '0'|| sysctl net.ipv6.conf.default.accept_redirects 2>&1|grep -io 'net.ipv6.conf.default.accept_redirects = 0'|wc -l| grep -vq '0'|| grep "net\.ipv6\.conf\.all\.accept_redirects" /etc/sysctl.conf/etc/sysctl.d/* 2>&1|grep -io 'net.ipv6.conf.all.accept_redirects= 0'|wc -l| grep -vq '0'||  grep "net\.ipv6\.conf\.default\.accept_redirects" /etc/sysctl.conf/etc/sysctl.d/* 2>&1|grep -io 'net.ipv6.conf.default.accept_redirects= 0'|wc -l| grep -vq '0'; then 
+printf "\n$CIS 3.2.2 Ensure ICMP redirects are not accepted   $SEC\n"
+else printf "\n$CIS 3.2.2 Ensure ICMP redirects are not accepted    $NO_SEC
+Description: ICMP redirect messages are packets that convey routing information and tell your host
+(acting as a router) to send packets via an alternate path. It is a way of allowing an outside
+routing device to update your system routing tables. By setting
+net.ipv4.conf.all.accept_redirects and net.ipv6.conf.all.accept_redirects to 0,
+the system will not accept any ICMP redirect messages, and therefore, won't allow
+outsiders to update the system's routing tables.\n"
+fi
+
+if  sysctl net.ipv4.conf.all..secure_redirects 2>&1|grep -oi 'net.ipv4.conf.all.secure_redirects = 0'|wc -l| grep -vq '0'||  sysctl net.ipv4.conf.default.secure_redirects 2>&1|grep -io 'net.ipv4.conf.default.secure_redirects = 0'|wc -l| grep -vq '0'|| grep "net\.ipv4\.conf\.all\.secure_redirects" /etc/sysctl.conf/etc/sysctl.d/* 2>&1|grep -io 'net.ipv4.conf.all.secure_redirects= 0'|wc -l| grep -vq '0'||grep "net\.ipv4\.conf\.default\.accept_redirects" /etc/sysctl.conf/etc/sysctl.d/* 2>&1|grep -io 'net.ipv4.conf.default.secure_redirects= 0'|wc -l| grep -vq '0'||sysctl net.ipv6.conf.all.secure_redirects 2>&1|grep -io 'net.ipv6.conf.all.secure_redirects = 0'|wc -l| grep -vq '0'|| sysctl net.ipv6.conf.default.accept_redirects 2>&1|grep -io 'net.ipv6.conf.default.secure_redirects = 0'|wc -l| grep -vq '0'|| grep "net\.ipv6\.conf\.all\.accept_redirects" /etc/sysctl.conf/etc/sysctl.d/* 2>&1|grep -io 'net.ipv6.conf.all.secure_redirects= 0'|wc -l| grep -vq '0'||  grep "net\.ipv6\.conf\.default\.secure_redirects" /etc/sysctl.conf/etc/sysctl.d/* 2>&1|grep -io 'net.ipv6.conf.default.secure_redirects= 0'|wc -l| grep -vq '0'; then 
+printf "\n$CIS 3.2.3 Ensure secure ICMP redirects are not accepted   $SEC\n"
+else printf "\n$CIS 3.2.3 Ensure secure ICMP redirects are not accepted    $NO_SEC
+Description: Secure ICMP redirects are the same as ICMP redirects, except they come from gateways
+listed on the default gateway list. It is assumed that these gateways are known to your
+system, and that they are likely to be secure.\n"
+fi
+
+if  sysctl net.ipv4.conf.all.log_martians 2>&1|grep -oi 'net.ipv4.conf.all.log_martians = 1'|wc -l| grep -vq '0' || sysctl net.ipv4.conf.default.log_martians 2>&1|grep -io 'net.ipv4.conf.default.log_martians = 1'|wc -l| grep -vq '0'||  grep "net\.ipv4\.conf\.all\.log_martians" /etc/sysctl.conf /etc/sysctl.d/* 2>&1|grep -io 'net.ipv4.conf.all.log_martians = 1'|wc -l| grep -vq '0'|| grep "net\.ipv4\.conf\.default\.log_martians" /etc/sysctl.conf/etc/sysctl.d/* 2>&1|grep -io 'net.ipv4.conf.default.log_martians = 1'|wc -l| grep -vq '0' ; then 
+printf "\n$CIS 3.2.4 Ensure suspicious packets are logged    $SEC\n"
+else printf "\n$CIS 3.2.4 Ensure suspicious packets are logged    $NO_SEC
+Description: When enabled, this feature logs packets with un-routable source addresses to the kernel log.\n"
+fi
+
+if   sysctl net.ipv4.icmp_echo_ignore_broadcasts 2>&1|grep -oi 'net.ipv4.icmp_echo_ignore_broadcasts = 1'|wc -l| grep -vq '0' ||  grep "net\.ipv4\.icmp_echo_ignore_broadcasts" /etc/sysctl.conf/etc/sysctl.d/* 2>&1|grep -io 'net.ipv4.icmp_echo_ignore_broadcasts = 1'|wc -l| grep -vq '0'; then 
+printf "\n$CIS 3.2.5 Ensure broadcast ICMP requests are ignored    $SEC\n"
+else printf "\n$CIS 3.2.5 Ensure broadcast ICMP requests are ignored    $NO_SEC
+Description: Setting net.ipv4.icmp_echo_ignore_broadcasts to 1 will cause the system to ignore all
+ICMP echo and timestamp requests to broadcast and multicast addresses.\n"
+fi
+
+if  sysctl net.ipv4.icmp_ignore_bogus_error_responses 2>&1|grep -oi 'net.ipv4.icmp_ignore_bogus_error_responses = 1'|wc -l| grep -vq '0' ||   grep "net.ipv4.icmp_ignore_bogus_error_responses" /etc/sysctl.conf/etc/sysctl.d/* 2>&1|grep -io 'net.ipv4.icmp_ignore_bogus_error_responses = 1'|wc -l| grep -vq '0'; then 
+printf "\n$CIS 3.2.6 Ensure bogus ICMP responses are ignored    $SEC\n"
+else printf "\n$CIS 3.2.6 Ensure bogus ICMP responses are ignored    $NO_SEC
+Description: Setting icmp_ignore_bogus_error_responses to 1 prevents the kernel from logging bogus
+responses (RFC-1122 non-compliant) from broadcast reframes, keeping file systems from
+filling up with useless log messages.\n"
+fi
+
+if  sysctl net.ipv4.conf.all.rp_filter 2>&1|grep -oi 'net.ipv4.conf.all.rp_filter = 1'|wc -l| grep -vq '0' ||  sysctl net.ipv4.conf.default.rp_filter 2>&1|grep -io 'net.ipv4.conf.default.rp_filter = 1'|wc -l| grep -vq '0' || grep "net\.ipv4\.conf\.all\.rp_filter" /etc/sysctl.conf /etc/sysctl.d/* 2>&1|grep -io 'net.ipv4.conf.all.rp_filter = 1'|wc -l| grep -vq '0' ||  grep "net\.ipv4\.conf\.default\.rp_filter" /etc/sysctl.conf /etc/sysctl.d/* 2>&1|grep -io 'net.ipv4.conf.default.rp_filter = 1'|wc -l| grep -vq '0' ; then 
+printf "\n$CIS 3.2.7 Ensure Reverse Path Filtering is enabled    $SEC\n"
+else printf "\n$CIS 3.2.7 Ensure Reverse Path Filtering is enabled    $NO_SEC
+Description: Setting net.ipv4.conf.all.rp_filter and net.ipv4.conf.default.rp_filter to 1 forces
+the Linux kernel to utilize reverse path filtering on a received packet to determine if the
+packet was valid. Essentially, with reverse path filtering, if the return packet does not go
+out the same interface that the corresponding source packet came from, the packet is
+dropped (and logged if log_martians is set).\n"
+fi
+
+
+if  sysctl net.ipv4.tcp_syncookies 2>&1|grep -oi 'net.ipv4.tcp_syncookies = 1'|wc -l| grep -vq '0' || grep "net\.ipv4\.tcp_syncookies" /etc/sysctl.conf /etc/sysctl.d/* 2>&1|grep -io 'net.ipv4.tcp_syncookies = 1'|wc -l| grep -vq '0' ; then 
+printf "\n$CIS 3.2.8 Ensure TCP SYN Cookies is enabled    $SEC\n"
+else printf "\n$CIS 3.2.8 Ensure TCP SYN Cookies is enabled    $NO_SEC
+Description: When tcp_syncookies is set, the kernel will handle TCP SYN packets normally until the
+half-open connection queue is full, at which time, the SYN cookie functionality kicks in. SYN
+cookies work by not using the SYN queue at all. Instead, the kernel simply replies to the
+SYN with a SYN|ACK, but will include a specially crafted TCP sequence number that
+encodes the source and destination IP address and port number and the time the packet
+was sent. A legitimate connection would send the ACK packet of the three way handshake
+with the specially crafted sequence number. This allows the system to verify that it has
+received a valid response to a SYN cookie and allow the connection, even though there is no
+corresponding SYN in the queue.\n"
+fi
+
+if sysctl net.ipv6.conf.all.accept_ra 2>&1|grep -oi 'net.ipv6.conf.all.accept_ra = 0'|wc -l| grep -vq '0' || sysctl net.ipv6.conf.default.accept_ra 2>&1|grep -io 'net.ipv6.conf.default.accept_ra = 0'|wc -l| grep -vq '0' ||  grep "net\.ipv6\.conf\.all\.accept_ra" /etc/sysctl.conf /etc/sysctl.d/* 2>&1|grep -io 'net.ipv6.conf.all.accept_ra = 0'|wc -l| grep -vq '0'||  grep "net\.ipv6\.conf\.default\.accept_ra" /etc/sysctl.conf /etc/sysctl.d/* 2>&1|grep -io 'net.ipv6.conf.default.accept_ra = 0'; then 
+printf "\n$CIS 3.2.9 Ensure IPv6 router advertisements are not accepted    $SEC\n"
+else printf "\n$CIS 3.2.9 Ensure IPv6 router advertisements are not accepted    $NO_SEC
+Description: This setting disables the system's ability to accept IPv6 router advertisements..\n"
+fi
+
+
+
+
+
+
+
 
 
 
