@@ -1,4 +1,4 @@
-#!/bin/bash
+d#!/bin/bash
 
 CIS="cis-ubuntu-linux-18.04"
 NO_SEC="\033[1;31m[not secured]\033[0m"
@@ -525,6 +525,12 @@ Description: A Firewall package should be selected. Most firewall configuration 
 front end to nftables or iptables.\n"
 fi
 
+if grep "^\s*linux" /boot/grub/grub.cfg | grep -v "ipv6.disable=1"|wc -l| grep -q '0'; then
+printf "\n$CIS 3.7 Disable IPv6 $SEC\n"
+else printf "\n$CIS 3.7 Disable IPv6 $NO_SEC
+Description:Although IPv6 has many advantages over IPv4, not all organizations have IPv6 or dual stack configurations implemented.Rationale:If IPv6 or dual stack is not to be used, it is recommended that IPv6 be disabled to reduce the attack surface of the system.\n"
+fi
+
 if   awk '/^\s*UID_MIN/{print $2}' /etc/login.defs 2>&1|grep -oi '1000'|wc -l| grep -vq '0' &&  dpkg -s rsyslog 2>&1|grep -io 'Status: install ok installed'|wc -l| grep -vq '0' &&  systemctl is-enabled rsyslog 2>&1|grep -io 'enabled'|wc -l| grep -vq '0' &&  grep ^\$FileCreateMode /etc/rsyslog.conf /etc/rsyslog.d/*.conf 2>&1|grep -io '$FileCreateMode 0640'|wc -l| grep -vq '0' ; then 
 printf "\n$CIS (4.1.10|4.2.1.1|4.2.1.2|4.2.1.4 ) Ensure unsuccessful unauthorized file access attempts arecollected  $SEC\n"
 else printf "\n$CIS (4.1.10|4.2.1.1|4.2.1.2|4.2.1.4 ) Ensure unsuccessful unauthorized file access attempts arecollected  $NO_SEC
@@ -574,13 +580,46 @@ Description:The /etc/passwd file contains user account information that is used 
 utilities and therefore must be readable for these utilities to operate.\n"
 fi
 
-if stat /etc/gshadow- 2>&1|grep -io 'Access: (0640/-rw-r-----)'|wc -l| grep -vq '0' ; then 
-printf "\n$CIS 6.1.3 Ensure permissions on /etc/gshadow- are configured   $SEC\n"
-else printf "\n$CIS 6.1.3 Ensure permissions on /etc/gshadow- are configured $NO_SEC
+if stat /etc/gshadow- 2>&1|grep -io 'Access: (0640/-rw-r-----)\|Access: (0640/-rw-r-----)'|wc -l| grep -vq '0' ; then 
+printf "\n$CIS 6.1.(3|) Ensure permissions on /etc/gshadow- are configured   $SEC\n"
+else printf "\n$CIS 6.1.(3|9) Ensure permissions on /etc/gshadow- are configured $NO_SEC
 Description:The /etc/gshadow- file is used to store backup information about groups that is critical to
 the security of those accounts, such as the hashed password and other security
-information.
-\n"
+information.\n"
+fi
+
+if stat /etc/shadow 2>&1|grep -io 'Access: (0640/-rw-r-----)\|Access: (0600/-rw-------)'|wc -l| grep -vq '0' ; then 
+printf "\n$CIS 6.1.(4|7) Ensure permissions on /etc/shadow are configured   $SEC\n"
+else printf "\n$CIS 6.1.(4|7) Ensure permissions on /etc/shadow are configured $NO_SEC
+Description:The /etc/shadow file is used to store the information about user accounts that is critical to
+the security of those accounts, such as the hashed password and other security
+information.\n"
+fi
+
+if  stat /etc/group 2>&1|grep -io 'Access: (0644/-rw-r--r--)\|Access: (0644/-rw-r--r--)'|wc -l| grep -vq '0' ; then 
+printf "\n$CIS 6.1.(5|8) Ensure permissions on /etc/group are configured   $SEC\n"
+else printf "\n$CIS 6.1.(5|8) Ensure permissions on /etc/group are configured $NO_SEC
+Description:The /etc/group file contains a list of all the valid groups defined in the system. The
+command below allows read/write access for root and read access for everyone else.\n"
+fi
+
+if  stat /etc/passwd- 2>&1|grep -io 'Access: (0600/-rw-------)'|wc -l| grep -vq '0' ; then 
+printf "\n$CIS 6.1.6 Ensure permissions on /etc/passwd- are configured  $SEC\n"
+else printf "\n$CIS 6.1.6 Ensure permissions on /etc/passwd- are configured $NO_SEC
+Description:The /etc/passwd- file contains backup user account information.\n"
+fi
+
+if  awk -F: '($2 == "" ) { print $1 " does not have a password "}' /etc/shadow 2>&1|wc -l| grep -q '0' ; then 
+printf "\n$CIS 6.2.1 Ensure password fields are not empty  $SEC\n"
+else printf "\n$CIS 6.2.1 Ensure password fields are not empty $NO_SEC
+Description:An account with an empty password field means that anybody may log in as that user
+without providing a password.\n"
+fi
+
+if   awk -F: '($3 == 0) { print $1 }' /etc/passwd 2>&1|grep -io 'root'|wc -l| grep -vq '0' ; then 
+printf "\n$CIS 6.2.6 Ensure root is the only UID 0 account  $SEC\n"
+else printf "\n$CIS 6.2.6 Ensure root is the only UID 0 account $NO_SEC
+Description:Any account with UID 0 has superuser privileges on the system.\n"
 fi
 
 
@@ -594,8 +633,8 @@ fi
 
 
 
-if grep "^\s*linux" /boot/grub/grub.cfg | grep -v "ipv6.disable=1"|wc -l| grep -q '0'; then
-printf "\n$CIS 3.7 Disable IPv6 $SEC\n"
-else printf "\n$CIS 3.7 Disable IPv6 $NO_SEC
-Description:Although IPv6 has many advantages over IPv4, not all organizations have IPv6 or dual stack configurations implemented.Rationale:If IPv6 or dual stack is not to be used, it is recommended that IPv6 be disabled to reduce the attack surface of the system.\n"
-fi
+
+
+
+
+
