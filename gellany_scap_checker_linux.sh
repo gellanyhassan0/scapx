@@ -525,13 +525,15 @@ Description: A Firewall package should be selected. Most firewall configuration 
 front end to nftables or iptables.\n"
 fi
 
+
 if grep "^\s*linux" /boot/grub/grub.cfg | grep -v "ipv6.disable=1"|wc -l| grep -q '0'; then
 printf "\n$CIS 3.7 Disable IPv6 $SEC\n"
 else printf "\n$CIS 3.7 Disable IPv6 $NO_SEC
 Description:Although IPv6 has many advantages over IPv4, not all organizations have IPv6 or dual stack configurations implemented.Rationale:If IPv6 or dual stack is not to be used, it is recommended that IPv6 be disabled to reduce the attack surface of the system.\n"
 fi
 
-if   awk '/^\s*UID_MIN/{print $2}' /etc/login.defs 2>&1|grep -oi '1000'|wc -l| grep -vq '0' &&  dpkg -s rsyslog 2>&1|grep -io 'Status: install ok installed'|wc -l| grep -vq '0' &&  systemctl is-enabled rsyslog 2>&1|grep -io 'enabled'|wc -l| grep -vq '0' &&  grep ^\$FileCreateMode /etc/rsyslog.conf /etc/rsyslog.d/*.conf 2>&1|grep -io '$FileCreateMode 0640'|wc -l| grep -vq '0' ; then 
+
+if   awk '/^\s*UID_MIN/{print $2}' /etc/login.defs 2>&1|grep -oi '1000'|wc -l| grep -vq '0' &&  dpkg -s rsyslog 2>&1|grep -io 'Status: install ok installed'|wc -l| grep -vq '0' &&  systemctl is-enabled rsyslog 2>&1|grep -io 'enabled'|wc -l| grep -vq '0' &&  grep '^\$FileCreateMode' /etc/rsyslog.conf /etc/rsyslog.d/*.conf 2>&1|grep -io '$FileCreateMode 0640'|wc -l| grep -vq '0' ; then 
 printf "\n$CIS (4.1.10|4.2.1.1|4.2.1.2|4.2.1.4 ) Ensure unsuccessful unauthorized file access attempts arecollected  $SEC\n"
 else printf "\n$CIS (4.1.10|4.2.1.1|4.2.1.2|4.2.1.4 ) Ensure unsuccessful unauthorized file access attempts arecollected  $NO_SEC
 Description:Monitor changes to file permissions, attributes, ownership and group. The parameters in
@@ -557,8 +559,9 @@ what permissions will be applied to these newly created files"
 fi
 
 
+
 #find /var/log -type f -exec chmod g-wx,o-rwx "{}" + -o -type d -exec chmod g-w,o-rwx "{}" + 2>&1
-if  find /var/log -type f -ls 2>&1|grep -oi '-rw-r--r--'|wc -l| grep -q '0' ; then 
+if  find /var/log -type f -ls 2>&1|grep -oi 'rw-r--r--'|wc -l| grep -q '0' ; then 
 printf "\n$CIS 4.2.3 Ensure permissions on all logfiles are configured   $SEC\n"
 else printf "\n$CIS 4.2.3 Ensure permissions on all logfiles are configured   $NO_SEC
 Description: Log files stored in /var/log/ contain logged information from many services on the system,
@@ -581,12 +584,13 @@ utilities and therefore must be readable for these utilities to operate.\n"
 fi
 
 if stat /etc/gshadow- 2>&1|grep -io 'Access: (0640/-rw-r-----)\|Access: (0640/-rw-r-----)'|wc -l| grep -vq '0' ; then 
-printf "\n$CIS 6.1.(3|) Ensure permissions on /etc/gshadow- are configured   $SEC\n"
+printf "\n$CIS 6.1.(3|9) Ensure permissions on /etc/gshadow- are configured   $SEC\n"
 else printf "\n$CIS 6.1.(3|9) Ensure permissions on /etc/gshadow- are configured $NO_SEC
 Description:The /etc/gshadow- file is used to store backup information about groups that is critical to
 the security of those accounts, such as the hashed password and other security
 information.\n"
 fi
+
 
 if stat /etc/shadow 2>&1|grep -io 'Access: (0640/-rw-r-----)\|Access: (0600/-rw-------)'|wc -l| grep -vq '0' ; then 
 printf "\n$CIS 6.1.(4|7) Ensure permissions on /etc/shadow are configured   $SEC\n"
@@ -595,6 +599,7 @@ Description:The /etc/shadow file is used to store the information about user acc
 the security of those accounts, such as the hashed password and other security
 information.\n"
 fi
+
 
 if  stat /etc/group 2>&1|grep -io 'Access: (0644/-rw-r--r--)\|Access: (0644/-rw-r--r--)'|wc -l| grep -vq '0' ; then 
 printf "\n$CIS 6.1.(5|8) Ensure permissions on /etc/group are configured   $SEC\n"
