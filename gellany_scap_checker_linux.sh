@@ -173,6 +173,14 @@ has led to USB-based malware being a simple and common means for network infiltr
 and a first step to establishing a persistent threat within a networked environment.\n"
 fi
 
+if apt-cache policy | grep -io 'Package files:'| wc -l| grep -vq '0' ; then 
+printf "\n$CIS 1.2.1 Ensure package manager repositories are configured       $SEC\n"
+else printf "\n$CIS 1.2.1 Ensure package manager repositories are configured     $NO_SEC
+Description: Systems need to have package manager repositories configured to ensure they receive the
+latest patches and updates.\n"
+fi
+
+
 if dpkg -s sudo 2>&1|grep -io 'Status: install ok installed'| wc -l| grep -vq '0' || dpkg -s sudo-ldap 2>&1|grep -io 'Status: install ok installed'| wc -l| grep -vq '0'; then 
 printf "\n$CIS 1.3.1 Ensure sudo is installed       $SEC\n"
 else printf "\n$CIS 1.3.1 Ensure sudo is installed     $NO_SEC
@@ -532,6 +540,13 @@ else printf "\n$CIS 3.7 Disable IPv6 $NO_SEC
 Description:Although IPv6 has many advantages over IPv4, not all organizations have IPv6 or dual stack configurations implemented.Rationale:If IPv6 or dual stack is not to be used, it is recommended that IPv6 be disabled to reduce the attack surface of the system.\n"
 fi
 
+if  grep -iE 'auth,authpriv.*/var/log/auth.log' /etc/rsyslog.conf /etc/rsyslog.d/*.conf 2>&1|wc -l| grep -vq '0' ; then 
+printf "\n$CIS 4.2.1.3 Ensure logging is configured     $SEC\n"
+else printf "\n$CIS 4.2.1.3 Ensure logging is configured     $NO_SEC
+Description: The /etc/rsyslog.conf and /etc/rsyslog.d/*.conf files specifies rules for logging and
+which files are to be used to log certain classes of messages.\n"
+fi
+
 
 if   awk '/^\s*UID_MIN/{print $2}' /etc/login.defs 2>&1|grep -oi '1000'|wc -l| grep -vq '0' &&  dpkg -s rsyslog 2>&1|grep -io 'Status: install ok installed'|wc -l| grep -vq '0' &&  systemctl is-enabled rsyslog 2>&1|grep -io 'enabled'|wc -l| grep -vq '0' &&  grep '^\$FileCreateMode' /etc/rsyslog.conf /etc/rsyslog.d/*.conf 2>&1|grep -io '$FileCreateMode 0640'|wc -l| grep -vq '0' ; then 
 printf "\n$CIS (4.1.10|4.2.1.1|4.2.1.2|4.2.1.4 ) Ensure unsuccessful unauthorized file access attempts arecollected  $SEC\n"
@@ -566,6 +581,15 @@ printf "\n$CIS 4.2.3 Ensure permissions on all logfiles are configured   $SEC\n"
 else printf "\n$CIS 4.2.3 Ensure permissions on all logfiles are configured   $NO_SEC
 Description: Log files stored in /var/log/ contain logged information from many services on the system,
 or on log hosts others as well.\n"
+fi
+
+if  grep '^\s*minlen\s*' /etc/security/pwquality.conf 2>&1|grep -oi 'minlen = 14'|wc -l| grep -vq '0' ||  grep '^\s*minclass\s*' /etc/security/pwquality.conf 2>&1|grep -io 'minclass = 4'|wc -l|grep -vq '0' || grep -E '^\s*[duol]credit\s*' /etc/security/pwquality.conf 2>&1|grep -io 'dcredit = -1'|wc -l|grep -vq '0'|grep -E'^\s*password\s+(requisite|required)\s+pam_pwquality\.so\s+(\S+\s+)*retry=[1-3]\s*(\s+\S+\s*)*(\s+#.*)?$' /etc/pam.d/common-password 2>&1|grep -io 'pam_pwquality.so retry=3'|wc -l|grep -vq '0'; then 
+printf "\n$CIS 5.3.1 Ensure password creation requirements are configured   $SEC\n"
+else printf "\n$CIS 5.3.1 Ensure password creation requirements are configured   $NO_SEC
+Description: The pam_pwquality.so module checks the strength of passwords. It performs checks such
+as making sure a password is not a dictionary word, it is a certain length, contains a mix of
+characters (e.g. alphabet, numeric, other) and more. The following are definitions of the
+pam_pwquality.so options.\n"
 fi
 
 if  grep "^root:" /etc/passwd | cut -f4 -d: 2>&1| grep -q '0' ; then 
