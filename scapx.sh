@@ -1,4 +1,4 @@
-d#!/bin/bash
+#!/bin/bash
 
 CIS="cis-ubuntu-linux-18.04"
 NO_SEC="\033[1;31m[not secured]\033[0m"
